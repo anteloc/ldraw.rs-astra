@@ -39,7 +39,7 @@ jobs:
 | Job | Produces |
 |---|---|
 | `check` | Runs `cargo clippy` + `cargo test`; every build job below waits on this |
-| `native` (4-way matrix: Linux x64, Windows x64, macOS x64, macOS arm64) | `ldraw-tools-<version>-<target-triple>.(tar.gz\|zip)` — `baker`, `ldr2img`, `viewer_native` + README + LICENSE |
+| `native` (3-way matrix: Linux x64, Windows x64, macOS arm64) | `ldraw-tools-<version>-<target-triple>.(tar.gz\|zip)` — `baker`, `ldr2img`, `viewer_native` + README + LICENSE |
 | `wasm-player` | `ldraw-player-<version>.zip` — the `.wasm`/`.js`/`.d.ts` bundle for `tools/player` |
 | `wasm-viewer` | `ldraw-viewer-web-<version>.zip` — the static webpack build of `tools/viewer/web` |
 | `docs` | `ldraw-rs-docs-<version>.zip` — rustdoc for `ldraw`, `ldraw-ir`, `ldraw-olr`, `ldraw-renderer` (not published to crates.io) |

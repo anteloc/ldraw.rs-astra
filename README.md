@@ -66,7 +66,6 @@ Every tagged release ([Releases](../../releases)) is built for all supported pla
 |---|---|
 | `ldraw-tools-<version>-x86_64-unknown-linux-gnu.tar.gz` | `baker`, `ldr2img`, `viewer_native` for Linux x64 |
 | `ldraw-tools-<version>-x86_64-pc-windows-msvc.zip` | same, for Windows x64 |
-| `ldraw-tools-<version>-x86_64-apple-darwin.tar.gz` | same, for macOS (Intel) |
 | `ldraw-tools-<version>-aarch64-apple-darwin.tar.gz` | same, for macOS (Apple Silicon) |
 | `ldraw-player-<version>.zip` | the `ldraw-player` WebAssembly bundle (`.wasm`/`.js`/`.d.ts`) for embedding in a web page |
 | `ldraw-viewer-web-<version>.zip` | a ready-to-serve static build of the WebAssembly model viewer |
