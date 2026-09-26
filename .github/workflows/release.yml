@@ -1,0 +1,133 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+env:
+  CARGO_TERM_COLOR: always
+
+permissions:
+  contents: write
+
+jobs:
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+          - os: macos-13
+            target: x86_64-apple-darwin
+          - os: macos-14
+            target: aarch64-apple-darwin
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compute version
+        shell: bash
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - name: Install Linux windowing/graphics headers
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libx11-dev libxkbcommon-dev libwayland-dev libudev-dev mesa-vulkan-drivers
+      - name: Build
+        run: cargo build --release --target ${{ matrix.target }} -p baker -p ldr2img -p viewer_native
+      - name: Package
+        shell: bash
+        env:
+          TARGET_TRIPLE: ${{ matrix.target }}
+          BIN_DIR: target/${{ matrix.target }}/release
+        run: ./scripts/package-native.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: native-${{ matrix.target }}
+          path: scripts/dist/*
+          if-no-files-found: error
+
+  wasm-player:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compute version
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - name: Install matching wasm-bindgen-cli
+        run: |
+          want="$(awk '$0 == "name = \"wasm-bindgen\"" { getline; gsub(/version = |"/, ""); print; exit }' Cargo.lock)"
+          cargo install wasm-bindgen-cli --version "$want"
+      - name: Install wasm-opt
+        run: sudo apt-get update && sudo apt-get install -y binaryen
+      - name: Build and package
+        run: ./tools/player/build.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wasm-player
+          path: tools/player/dist/*
+          if-no-files-found: error
+
+  wasm-viewer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compute version
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+      - name: Build and package
+        run: ./scripts/package-viewer-web.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wasm-viewer
+          path: scripts/dist/*
+          if-no-files-found: error
+
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compute version
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build and package
+        run: ./scripts/package-docs.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: docs
+          path: scripts/dist/*
+          if-no-files-found: error
+
+  release:
+    needs: [native, wasm-player, wasm-viewer, docs]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      - name: Combine checksums
+        working-directory: artifacts
+        run: |
+          rm -f SHA256SUMS.txt
+          sha256sum -- * > SHA256SUMS.txt 2>/dev/null || shasum -a 256 -- * > SHA256SUMS.txt
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          generate_release_notes: true
+          files: artifacts/*

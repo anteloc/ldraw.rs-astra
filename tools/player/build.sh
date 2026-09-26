@@ -13,7 +13,7 @@ set -euo pipefail
 
 here="$(cd "$(dirname "$0")" && pwd)"
 root="$(cd "$here/../.." && pwd)"
-version="$(sed -n 's/^version = "\(.*\)"$/\1/p' "$here/Cargo.toml" | head -n1)"
+version="${VERSION:-$(sed -n 's/^version = "\(.*\)"$/\1/p' "$root/Cargo.toml" | head -n1)}"
 name="ldraw-player-$version"
 dist="$here/dist"
 cd "$root"

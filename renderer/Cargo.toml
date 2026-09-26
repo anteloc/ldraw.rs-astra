@@ -1,6 +1,6 @@
 [package]
 name = "ldraw-renderer"
-version = "0.0.1"
+version.workspace = true
 authors = ["Park Joon-Kyu <segfault87@gmail.com>"]
 edition = "2024"
 

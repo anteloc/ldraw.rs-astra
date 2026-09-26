@@ -1,6 +1,6 @@
 [package]
 name = "ldraw-player"
-version = "0.1.0"
+version.workspace = true
 edition = "2024"
 license = "MIT"
 description = "Build-animation player for LDraw models in the browser (WebAssembly + wgpu)"
