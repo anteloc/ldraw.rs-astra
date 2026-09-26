@@ -33,7 +33,9 @@ cp "$root/README.md" "$root/LICENSE.md" "$dist/$name/"
 cd "$dist"
 sha256() { command -v shasum >/dev/null && shasum -a 256 "$1" || sha256sum "$1"; }
 if [[ "$target_triple" == *windows* ]]; then
-    zip -qrX "$name.zip" "$name"
+    # Git Bash on the windows-latest runner has no `zip`; PowerShell's
+    # Compress-Archive is always available there.
+    powershell -NoProfile -Command "Compress-Archive -Path '$name' -DestinationPath '$name.zip' -Force"
     sha256 "$name.zip" > "$name.zip.sha256"
 else
     tar -czf "$name.tar.gz" "$name"

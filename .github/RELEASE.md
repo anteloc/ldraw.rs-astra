@@ -33,11 +33,12 @@ git tag -a v1.2.0 -m "v1.2.0"
 git push origin v1.2.0
 ```
 
-Pushing the tag triggers the `Release` workflow (Actions tab). It runs five
-jobs in parallel/sequence:
+Pushing the tag triggers the `Release` workflow (Actions tab). It runs six
+jobs:
 
 | Job | Produces |
 |---|---|
+| `check` | Runs `cargo clippy` + `cargo test`; every build job below waits on this |
 | `native` (4-way matrix: Linux x64, Windows x64, macOS x64, macOS arm64) | `ldraw-tools-<version>-<target-triple>.(tar.gz\|zip)` — `baker`, `ldr2img`, `viewer_native` + README + LICENSE |
 | `wasm-player` | `ldraw-player-<version>.zip` — the `.wasm`/`.js`/`.d.ts` bundle for `tools/player` |
 | `wasm-viewer` | `ldraw-viewer-web-<version>.zip` — the static webpack build of `tools/viewer/web` |
@@ -45,7 +46,13 @@ jobs in parallel/sequence:
 | `release` | Downloads everything above, adds a combined `SHA256SUMS.txt`, publishes the GitHub Release with auto-generated notes |
 
 Watch progress under the repo's **Actions** tab. The whole run takes a few
-minutes; the `release` job only starts once all four build jobs succeed.
+minutes; the `release` job only starts once all four build jobs succeed, and
+those only start once `check` passes.
+
+Note: builds only happen for tagged releases. [`.github/workflows/rust.yml`](workflows/rust.yml)
+(clippy/test/build on every push) is manual-only (`workflow_dispatch`) so it
+doesn't run on every commit; use it from the Actions tab if you want to
+sanity-check a branch before tagging.
 
 ## 3. Verify
 

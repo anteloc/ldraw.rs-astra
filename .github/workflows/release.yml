@@ -12,7 +12,25 @@ permissions:
   contents: write
 
 jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+          components: clippy
+      - name: Install Linux windowing/graphics headers
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libx11-dev libxkbcommon-dev libwayland-dev libudev-dev mesa-vulkan-drivers
+      - name: Lint
+        run: cargo clippy --workspace --exclude viewer_web --exclude ldraw-player
+      - name: Test
+        run: cargo test --workspace --exclude viewer_web --exclude ldraw-player --verbose
+
   native:
+    needs: check
     strategy:
       fail-fast: false
       matrix:
@@ -54,6 +72,7 @@ jobs:
           if-no-files-found: error
 
   wasm-player:
+    needs: check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -77,6 +96,7 @@ jobs:
           if-no-files-found: error
 
   wasm-viewer:
+    needs: check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -99,6 +119,7 @@ jobs:
           if-no-files-found: error
 
   docs:
+    needs: check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
