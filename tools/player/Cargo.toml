@@ -1,0 +1,52 @@
+[package]
+name = "ldraw-player"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+description = "Build-animation player for LDraw models in the browser (WebAssembly + wgpu)"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+# The timeline and camera are plain Rust (unit-tested natively with `cargo test -p ldraw-player`);
+# everything that touches the browser is wasm32-only.
+[dependencies]
+cgmath.workspace = true
+ldraw = { path = "../../ldraw" }
+ldraw-ir = { path = "../../ir" }
+ldraw-renderer = { path = "../../renderer" }
+uuid.workspace = true
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+async-trait = "~0.1.52"
+console_error_panic_hook = "~0.1.7"
+js-sys = "~0.3.77"
+raw-window-handle = "0.6"
+reqwest = "~0.12.4"
+tokio.workspace = true
+uuid = { workspace = true, features = ["js"] }
+wasm-bindgen = "~0.2.100"
+wasm-bindgen-futures = "~0.4.43"
+wgpu = { workspace = true, features = ["webgl", "webgpu"] }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies.web-sys]
+version = "~0.3.77"
+features = [
+    'AddEventListenerOptions',
+    'console',
+    'CssStyleDeclaration',
+    'Document',
+    'DomRect',
+    'Element',
+    'Event',
+    'EventTarget',
+    'HtmlCanvasElement',
+    'HtmlElement',
+    'KeyboardEvent',
+    'Location',
+    'MouseEvent',
+    'Performance',
+    'PointerEvent',
+    'WheelEvent',
+    'Window',
+]

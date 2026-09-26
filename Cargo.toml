@@ -7,6 +7,7 @@ members = [
     "olr",
     "renderer",
     "tools/baker",
+    "tools/player",
     "tools/ldr2img",
     "tools/viewer/common",
     "tools/viewer/native",
@@ -23,3 +24,12 @@ tokio = { version = "1.37", features = ["io-util"] }
 tokio-stream = { version = "0.1", features = ["io-util"] }
 uuid = { version = "1", features = ["v4", "serde"] }
 wgpu = { version = "29.0" }
+
+# Size-optimised release build for the WebAssembly player (tools/player/build.sh).
+# A separate profile, so native release builds of the other tools are unchanged.
+[profile.wasm-release]
+inherits = "release"
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"
