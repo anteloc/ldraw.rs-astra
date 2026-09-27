@@ -34,4 +34,6 @@ EOF
 (cd "$dist" && zip -qrX "$name.zip" "$name")
 sha256() { command -v shasum >/dev/null && shasum -a 256 "$1" || sha256sum "$1"; }
 (cd "$dist" && sha256 "$name.zip" > "$name.zip.sha256")
-ls -l "$dist/$name"
+# Only the archive (not the staging directory) is a release asset.
+rm -rf "${dist:?}/${name:?}"
+ls -l "$dist"/"$name".*

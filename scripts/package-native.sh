@@ -41,4 +41,6 @@ else
     tar -czf "$name.tar.gz" "$name"
     sha256 "$name.tar.gz" > "$name.tar.gz.sha256"
 fi
-ls -l "$dist/$name"
+# Only the archive (not the staging directory) is a release asset.
+rm -rf "${name:?}"
+ls -l "$dist"/"$name".*

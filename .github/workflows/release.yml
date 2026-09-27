@@ -142,9 +142,13 @@ jobs:
           merge-multiple: true
       - name: Combine checksums
         working-directory: artifacts
+        shell: bash
         run: |
           rm -f SHA256SUMS.txt
-          sha256sum -- * > SHA256SUMS.txt 2>/dev/null || shasum -a 256 -- * > SHA256SUMS.txt
+          sha256() { command -v shasum >/dev/null && shasum -a 256 "$1" || sha256sum "$1"; }
+          for f in *; do
+            [ -f "$f" ] && sha256 "$f"
+          done > SHA256SUMS.txt
       - uses: softprops/action-gh-release@v2
         with:
           name: ${{ github.ref_name }}
