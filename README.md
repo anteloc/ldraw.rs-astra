@@ -39,7 +39,7 @@ Native binaries:
 cargo build --release -p baker -p ldr2img -p viewer_native
 ```
 
-The `ldraw-player` WebAssembly bundle (also needs `wasm-bindgen-cli`, pinned to the version in `Cargo.lock`, and optionally `wasm-opt` from [Binaryen] to shrink the output):
+The `ldraw-player` WebAssembly bundle (also needs `wasm-bindgen-cli`, pinned to the version in `Cargo.lock`, and optionally `wasm-opt` from a recent [Binaryen] to shrink the output — releases use version 133; older ones such as Ubuntu 24.04's 108 produce a player that doesn't start — and Node.js, to check that the result starts):
 
 ```bash
 cargo install wasm-bindgen-cli --version "$(awk '$0 == "name = \"wasm-bindgen\"" { getline; gsub(/version = |"/, ""); print; exit }' Cargo.lock)"
